@@ -17,7 +17,7 @@ var app AppState
 
 func init() {
 	flag.BoolVar(&app.reset, "restart", false, "Restart streak")
-	flag.Int64Var(&app.Start, "start_date", time.Now().Unix(), "Set Start Date of Streak in UTC Time Format")
+	flag.Int64Var(&app.Start, "start_date", -1, "Set Start Date of Streak in UTC Time Format")
 }
 
 func save_to_file(app AppState) error {
@@ -47,10 +47,7 @@ func load_from_file() (*AppState, error) {
 
 func main() {
 	flag.Parse()
-	if (app.reset == true) {
-		err := save_to_file(app)
-		fmt.Println(err)
-	} else {
+	if (app.reset != true && app.Start == -1) {
 		app, err := load_from_file()
 		if err == nil {
 			t := time.Unix(int64(app.Start), 0)
@@ -58,6 +55,11 @@ func main() {
 		} else {
 			fmt.Println("Error: ", err)
 		}
-
+	} else if (app.reset == true || app.Start != -1) {
+		app.Start = time.Now().Unix()
+		err := save_to_file(app)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
